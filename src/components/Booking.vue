@@ -61,7 +61,7 @@
             </template>
             <v-date-picker
               v-model="dateFrom"
-              :max="dateFromMax"
+              :min="dateFromMin"
               no-title
               scrollable
             >
@@ -152,7 +152,7 @@ export default {
     departureSelected: 'Amsterdam - Schiphol (AMS)',
     destinations: ['Afghanistan', 'Albanië', 'Algerije', 'Amerikaanse Maagdeneilanden', 'Angola', 'Antigua en Barbuda', 'Argentina', 'Armenië', 'Aruba', 'Australië', 'Azerbeidzjan'],
     destinationSelected: 'Afghanistan',
-    dateFromMax: '',
+    dateFromMin: new Date().toISOString().substr(0, 10),
     dateFrom: new Date().toISOString().substr(0, 10),
     menuFrom: false,
     dateTill: '',
@@ -161,19 +161,14 @@ export default {
     passengers: 2,
   }),
   mounted () {
-    const dateTill = new Date()
-
-    dateTill.setDate(dateTill.getDate() + 1)
-
-    this.dateTill = dateTill.toISOString().substr(0, 10)
-
-    this.setDateFromMax(dateTill)
+    this.setDateTill(new Date())
     this.setDateTillMin(new Date())
   },
   watch: {
     dateFrom (date) {
       this.$refs.menuFrom.save(date)
 
+      this.setDateTill(date)
       this.setDateTillMin(new Date(Date.parse(date)))
 
       this.menuFrom = false
@@ -181,19 +176,20 @@ export default {
     dateTill (date) {
       this.$refs.menuTill.save(date)
 
-      this.setDateFromMax(new Date(Date.parse(date)))
-      
       this.menuTill = false
     },
   },
   methods: {
+    setDateTill (date) {
+      const dateTill = new Date(Date.parse(date))
+
+      dateTill.setDate(dateTill.getDate() + 7)
+
+      this.dateTill = dateTill.toISOString().substr(0, 10)
+    },
     setDateTillMin (date) {
       const dateTillMin = new Date(date.setDate(date.getDate() + 1))
       this.dateTillMin = dateTillMin.toISOString().substr(0, 10)
-    },
-    setDateFromMax (date) {
-      const dateFromMax = new Date(date.setDate(date.getDate() - 1))
-      this.dateFromMax = dateFromMax.toISOString().substr(0, 10)
     },
     validate () {
       this.submitted = this.$refs.booking.validate()
